@@ -95,14 +95,18 @@ export const getTasks = (req, res) => {
 
 export const createTask = (req, res) => {
   try {
-    const { title, description, startTime, endTime, priority, category, date, durationHours } = req.body;
+    const { title, description, startTime, endTime, priority, category, date, durationHours, durationMinutes } = req.body;
     
     if (!title || !startTime || !endTime) {
       return res.status(400).json({ message: "Title, start time, and end time are required" });
     }
 
-    if (durationHours && (Number(durationHours) < 1 || Number(durationHours) > 24)) {
-      return res.status(400).json({ message: "Thời hạn đếm ngược không được vượt quá 24 giờ" });
+    const hours = durationHours ? Number(durationHours) : 0;
+    const mins = durationMinutes ? Number(durationMinutes) : 0;
+    const totalMin = (hours * 60) + mins;
+
+    if ((durationHours || durationMinutes) && (totalMin < 1 || totalMin > 1440)) {
+      return res.status(400).json({ message: "Thời hạn đếm ngược chỉ được từ 1 phút đến 24 giờ" });
     }
 
     const newTask = {
@@ -115,7 +119,8 @@ export const createTask = (req, res) => {
       priority: priority || "medium",
       category: category || "personal",
       date: date || new Date().toISOString().split('T')[0],
-      durationHours: durationHours ? Number(durationHours) : null
+      durationHours: durationHours ? Number(durationHours) : null,
+      durationMinutes: durationMinutes ? Number(durationMinutes) : null
     };
 
     tasks.push(newTask);
@@ -134,9 +139,13 @@ export const updateTask = (req, res) => {
       return res.status(404).json({ message: "Task not found" });
     }
 
-    const { title, durationHours } = req.body;
-    if (durationHours && (Number(durationHours) < 1 || Number(durationHours) > 24)) {
-      return res.status(400).json({ message: "Thời hạn đếm ngược không được vượt quá 24 giờ" });
+    const { title, durationHours, durationMinutes } = req.body;
+    const hours = durationHours ? Number(durationHours) : 0;
+    const mins = durationMinutes ? Number(durationMinutes) : 0;
+    const totalMin = (hours * 60) + mins;
+
+    if ((durationHours || durationMinutes) && (totalMin < 1 || totalMin > 1440)) {
+      return res.status(400).json({ message: "Thời hạn đếm ngược chỉ được từ 1 phút đến 24 giờ" });
     }
 
     const updatedTask = {
@@ -145,7 +154,10 @@ export const updateTask = (req, res) => {
       title: title ? title.toUpperCase() : tasks[taskIndex].title,
       durationHours: req.body.durationHours !== undefined 
         ? (req.body.durationHours ? Number(req.body.durationHours) : null)
-        : tasks[taskIndex].durationHours
+        : tasks[taskIndex].durationHours,
+      durationMinutes: req.body.durationMinutes !== undefined 
+        ? (req.body.durationMinutes ? Number(req.body.durationMinutes) : null)
+        : tasks[taskIndex].durationMinutes
     };
 
     tasks[taskIndex] = updatedTask;
