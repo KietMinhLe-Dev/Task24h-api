@@ -95,7 +95,7 @@ export const getTasks = (req, res) => {
 
 export const createTask = (req, res) => {
   try {
-    const { title, description, startTime, endTime, priority, category, date } = req.body;
+    const { title, description, startTime, endTime, priority, category, date, durationHours } = req.body;
     
     if (!title || !startTime || !endTime) {
       return res.status(400).json({ message: "Title, start time, and end time are required" });
@@ -110,7 +110,8 @@ export const createTask = (req, res) => {
       completed: false,
       priority: priority || "medium",
       category: category || "personal",
-      date: date || new Date().toISOString().split('T')[0]
+      date: date || new Date().toISOString().split('T')[0],
+      durationHours: durationHours ? Number(durationHours) : null
     };
 
     tasks.push(newTask);
