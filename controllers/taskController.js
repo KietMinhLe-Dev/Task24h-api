@@ -101,9 +101,13 @@ export const createTask = (req, res) => {
       return res.status(400).json({ message: "Title, start time, and end time are required" });
     }
 
+    if (durationHours && (Number(durationHours) < 1 || Number(durationHours) > 24)) {
+      return res.status(400).json({ message: "Thời hạn đếm ngược không được vượt quá 24 giờ" });
+    }
+
     const newTask = {
       id: `task-${Date.now()}`,
-      title,
+      title: title.toUpperCase(),
       description: description || "",
       startTime,
       endTime,
@@ -130,9 +134,18 @@ export const updateTask = (req, res) => {
       return res.status(404).json({ message: "Task not found" });
     }
 
+    const { title, durationHours } = req.body;
+    if (durationHours && (Number(durationHours) < 1 || Number(durationHours) > 24)) {
+      return res.status(400).json({ message: "Thời hạn đếm ngược không được vượt quá 24 giờ" });
+    }
+
     const updatedTask = {
       ...tasks[taskIndex],
-      ...req.body
+      ...req.body,
+      title: title ? title.toUpperCase() : tasks[taskIndex].title,
+      durationHours: req.body.durationHours !== undefined 
+        ? (req.body.durationHours ? Number(req.body.durationHours) : null)
+        : tasks[taskIndex].durationHours
     };
 
     tasks[taskIndex] = updatedTask;
