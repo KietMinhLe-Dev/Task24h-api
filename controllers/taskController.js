@@ -4,8 +4,12 @@ export const getTasks = async (req, res) => {
   try {
     const { date } = req.query;
     const dbTasks = await taskDb.getTasks(date);
-    // Sort tasks by start time chronologically
-    dbTasks.sort((a, b) => a.startTime.localeCompare(b.startTime));
+    // Sort tasks by start time chronologically (safely handle missing startTime)
+    dbTasks.sort((a, b) => {
+      const timeA = a.startTime || "";
+      const timeB = b.startTime || "";
+      return timeA.localeCompare(timeB);
+    });
     res.status(200).json(dbTasks);
   } catch (error) {
     res.status(500).json({ message: "Failed to fetch tasks", error: error.message });
