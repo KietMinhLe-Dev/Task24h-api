@@ -1,9 +1,14 @@
 import express from "express";
 import cors from "cors";
+import "dotenv/config";
+import { initDb } from "./config/database.js";
 import taskRoutes from "./routes/taskRoutes.js";
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+// Initialize Database
+await initDb();
 
 // Middleware
 app.use(cors());
